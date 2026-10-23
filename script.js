@@ -1,219 +1,211 @@
-// Number Hunt by Prajwal
-// Personal records are stored in this browser using localStorage.
-// No backend or account is required. Records are device/browser-specific.
+(() => {
+  "use strict";
+  const levels = {
+    easy: { min: 1, max: 50, attempts: 10, label: "EASY" },
+    medium: { min: 1, max: 100, attempts: 7, label: "MEDIUM" },
+    hard: { min: 1, max: 500, attempts: 8, label: "HARD" }
+  };
+  const $ = (id) => document.getElementById(id);
+  const STORAGE_KEY = "numberHunt.personalRecords.v1";
+  const NAME_KEY = "numberHunt.playerName.v1";
+  let levelKey = "medium", secret = 0, attemptsUsed = 0, history = [], gameOver = false, won = false;
+  let soundOn = true, audioContext = null;
+  let records = loadRecords();
 
-const MIN_NUMBER = 1;
-const MAX_NUMBER = 100;
-const MAX_ATTEMPTS = 7;
-const SCORE_STORAGE_KEY = "numberHunt.personalRecords.v1";
-
-const guessForm = document.querySelector("#guess-form");
-const guessInput = document.querySelector("#guess-input");
-const guessButton = document.querySelector("#guess-button");
-const attemptCount = document.querySelector("#attempt-count");
-const attemptDots = document.querySelector("#attempt-dots");
-const feedback = document.querySelector("#feedback");
-const feedbackText = document.querySelector("#feedback-text");
-const restartButton = document.querySelector("#restart-button");
-const lastGuess = document.querySelector("#last-guess");
-const lastResult = document.querySelector("#last-result");
-const recentGuesses = document.querySelector("#recent-guesses");
-const historyCount = document.querySelector("#history-count");
-const bestScore = document.querySelector("#best-score");
-const totalWins = document.querySelector("#total-wins");
-const winStreak = document.querySelector("#win-streak");
-const scoreMessage = document.querySelector("#score-message");
-const resetScoresButton = document.querySelector("#reset-scores");
-
-let secretNumber;
-let attemptsUsed;
-let gameOver;
-let guessHistory = [];
-
-function emptyRecords() {
-  return { bestGuesses: null, totalWins: 0, currentStreak: 0, bestStreak: 0 };
-}
-
-function loadRecords() {
-  try {
-    const saved = localStorage.getItem(SCORE_STORAGE_KEY);
-    if (!saved) return emptyRecords();
-    const parsed = JSON.parse(saved);
-    return {
-      bestGuesses: Number.isInteger(parsed.bestGuesses) && parsed.bestGuesses >= 1 && parsed.bestGuesses <= MAX_ATTEMPTS
-        ? parsed.bestGuesses : null,
-      totalWins: Number.isInteger(parsed.totalWins) && parsed.totalWins >= 0 ? parsed.totalWins : 0,
-      currentStreak: Number.isInteger(parsed.currentStreak) && parsed.currentStreak >= 0 ? parsed.currentStreak : 0,
-      bestStreak: Number.isInteger(parsed.bestStreak) && parsed.bestStreak >= 0 ? parsed.bestStreak : 0
-    };
-  } catch {
-    return emptyRecords();
+  function loadRecords() {
+    try {
+      const value = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      return value && typeof value === "object" ? {
+        bestScore: Number.isInteger(value.bestScore) ? value.bestScore : null,
+        totalWins: Number(value.totalWins) || 0,
+        currentStreak: Number(value.currentStreak) || 0,
+        bestStreak: Number(value.bestStreak) || 0
+      } : { bestScore: null, totalWins: 0, currentStreak: 0, bestStreak: 0 };
+    } catch (_) { return { bestScore: null, totalWins: 0, currentStreak: 0, bestStreak: 0 }; }
   }
-}
-
-let records = loadRecords();
-
-function saveRecords() {
-  try {
-    localStorage.setItem(SCORE_STORAGE_KEY, JSON.stringify(records));
-  } catch {
-    scoreMessage.textContent = "Records cannot be saved in this browser session.";
+  function saveRecords() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); } catch (_) {}
+    renderRecords();
   }
-}
-
-function updateScoreboard() {
-  bestScore.textContent = records.bestGuesses === null ? "—" : records.bestGuesses;
-  totalWins.textContent = records.totalWins;
-  winStreak.textContent = records.currentStreak;
-  if (records.totalWins === 0) {
-    scoreMessage.textContent = "Win a round to set your first record.";
-  } else {
-    scoreMessage.textContent = `Best: ${records.bestGuesses} ${records.bestGuesses === 1 ? "guess" : "guesses"} · Best streak: ${records.bestStreak}. Records stay in this browser.`;
+  function renderRecords() {
+    $("bestScore").textContent = records.bestScore ?? "—";
+    $("totalWins").textContent = records.totalWins;
+    $("currentStreak").textContent = records.currentStreak;
+    $("bestStreak").textContent = records.bestStreak;
   }
-}
-
-function startGame() {
-  secretNumber = Math.floor(Math.random() * MAX_NUMBER) + MIN_NUMBER;
-  attemptsUsed = 0;
-  gameOver = false;
-  guessHistory = [];
-
-  guessInput.disabled = false;
-  guessButton.disabled = false;
-  guessInput.value = "";
-  guessInput.min = MIN_NUMBER;
-  guessInput.max = MAX_NUMBER;
-  restartButton.hidden = true;
-
-  setFeedback("System ready. Make your first guess.", "ready");
-  updateAttempts();
-  updateHistory();
-  updateScoreboard();
-  guessInput.focus();
-}
-
-function setFeedback(message, type) {
-  feedbackText.textContent = message;
-  feedback.className = `feedback ${type}`;
-}
-
-function updateAttempts() {
-  const remaining = MAX_ATTEMPTS - attemptsUsed;
-  attemptCount.innerHTML = `${remaining} <small>/ ${MAX_ATTEMPTS}</small>`;
-  [...attemptDots.children].forEach((dot, index) => {
-    dot.classList.toggle("used", index >= remaining);
+  function currentLevel() { return levels[levelKey]; }
+  function playerName() { return $("playerName").value.trim() || "Hunter"; }
+  function setMessage(text, type = "") {
+    const el = $("message"); el.textContent = text; el.className = "message" + (type ? " " + type : "");
+  }
+  function setStatus(text, active = true) {
+    $("gameStatus").innerHTML = `<span class="status-dot"></span> ${text}`;
+    $("gameStatus").style.color = active ? "var(--green)" : "var(--muted)";
+  }
+  function updateAttempts() {
+    const cfg = currentLevel(), left = cfg.attempts - attemptsUsed;
+    $("attemptsLeft").textContent = left;
+    $("attemptsTotal").textContent = " / " + cfg.attempts;
+    $("attemptTrack").innerHTML = "";
+    for (let i = 0; i < cfg.attempts; i++) {
+      const block = document.createElement("span");
+      block.className = "attempt-block " + (i >= attemptsUsed ? "active" : "used");
+      $("attemptTrack").appendChild(block);
+    }
+  }
+  function renderHistory() {
+    const el = $("guessHistory");
+    if (!history.length) { el.innerHTML = '<div class="empty-history">Your guesses will appear here.</div>'; return; }
+    el.innerHTML = "";
+    history.slice(0, 5).forEach(item => {
+      const row = document.createElement("div");
+      row.className = "history-item " + item.kind;
+      const num = document.createElement("strong"); num.className = "history-number"; num.textContent = item.guess;
+      const hint = document.createElement("span"); hint.className = "history-hint"; hint.textContent = item.hint;
+      const badge = document.createElement("span"); badge.className = "history-badge"; badge.textContent = item.badge;
+      row.append(num, hint, badge); el.appendChild(row);
+    });
+  }
+  function thermal(distance) {
+    const maxDistance = currentLevel().max - currentLevel().min;
+    const closeness = Math.max(0, 100 - (distance / maxDistance) * 100);
+    $("thermalFill").style.width = closeness + "%";
+    let label;
+    if (distance === 0) label = "TARGET ACQUIRED";
+    else if (distance <= Math.max(2, Math.ceil(maxDistance * .02))) label = "🔥 BURNING HOT";
+    else if (distance <= Math.max(5, Math.ceil(maxDistance * .08))) label = "🌡️ HOT: VERY CLOSE";
+    else if (distance <= Math.ceil(maxDistance * .18)) label = "WARM: GETTING CLOSER";
+    else if (distance <= Math.ceil(maxDistance * .35)) label = "COOL: KEEP SEARCHING";
+    else label = "❄️ COLD: FAR FROM TARGET";
+    $("thermalLabel").textContent = label;
+  }
+  function tone(freq, duration, type = "sine", volume = .045, delay = 0) {
+    if (!soundOn) return;
+    try {
+      audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+      const start = audioContext.currentTime + delay, oscillator = audioContext.createOscillator(), gain = audioContext.createGain();
+      oscillator.type = type; oscillator.frequency.setValueAtTime(freq, start);
+      gain.gain.setValueAtTime(volume, start); gain.gain.exponentialRampToValueAtTime(.001, start + duration);
+      oscillator.connect(gain); gain.connect(audioContext.destination); oscillator.start(start); oscillator.stop(start + duration);
+    } catch (_) {}
+  }
+  function clickSound() { tone(480, .055, "square", .018); }
+  function winSound() { [523,659,784,1047].forEach((f,i) => tone(f,.28,"triangle",.055,i*.12)); }
+  function loseSound() { tone(330,.2,"sawtooth",.025); tone(220,.35,"sawtooth",.02,.18); }
+  function startGame() {
+    const cfg = currentLevel();
+    secret = Math.floor(Math.random() * (cfg.max - cfg.min + 1)) + cfg.min;
+    attemptsUsed = 0; history = []; gameOver = false; won = false;
+    $("rangeDisplay").textContent = String(cfg.min).padStart(2,"0") + " — " + cfg.max;
+    $("guessInput").min = cfg.min; $("guessInput").max = cfg.max; $("guessInput").value = "";
+    $("guessInput").placeholder = "??"; $("guessInput").disabled = false; $("guessButton").disabled = false;
+    $("guessInput").setAttribute("aria-label", `Guess a number from ${cfg.min} to ${cfg.max}`);
+    $("lastGuess").textContent = "—"; $("lastResult").textContent = "WAITING";
+    $("thermalFill").style.width = "0%"; $("thermalLabel").textContent = "WAITING FOR FIRST GUESS";
+    $("targetQuestion")?.classList?.remove("target-hit");
+    document.querySelector(".game-panel").classList.remove("target-hit");
+    $("winOverlay").classList.remove("show"); $("winOverlay").setAttribute("aria-hidden","true");
+    $("confetti").innerHTML = "";
+    updateAttempts(); renderHistory(); setStatus("READY");
+    setMessage(`${playerName()}, target range ${cfg.min}–${cfg.max}. Find the number in ${cfg.attempts} attempts.`);
+  }
+  function confettiBurst() {
+    const holder = $("confetti"); holder.innerHTML = "";
+    for (let i = 0; i < 85; i++) {
+      const piece = document.createElement("span"); piece.className = "confetti-piece";
+      piece.style.left = Math.random() * 100 + "%";
+      piece.style.animationDelay = Math.random() * .9 + "s";
+      piece.style.animationDuration = (1.7 + Math.random() * 1.8) + "s";
+      piece.style.transform = `rotate(${Math.random()*360}deg)`;
+      holder.appendChild(piece);
+    }
+  }
+  function showWin() {
+    $("winTitle").textContent = `${playerName()}, TARGET ACQUIRED!`;
+    $("winText").textContent = `You cracked ${secret} in ${attemptsUsed} ${attemptsUsed === 1 ? "guess" : "guesses"}. That's a successful hunt!`;
+    confettiBurst(); $("winOverlay").classList.add("show"); $("winOverlay").setAttribute("aria-hidden","false");
+    document.querySelector(".game-panel").classList.add("target-hit");
+    winSound();
+  }
+  function finishWin() {
+    gameOver = true; won = true; setStatus("VICTORY", false);
+    $("guessInput").disabled = true; $("guessButton").disabled = true;
+    records.totalWins += 1; records.currentStreak += 1; records.bestStreak = Math.max(records.bestStreak, records.currentStreak);
+    if (records.bestScore === null || attemptsUsed < records.bestScore) records.bestScore = attemptsUsed;
+    saveRecords(); setMessage(`${playerName()}, target acquired! You won in ${attemptsUsed} ${attemptsUsed === 1 ? "guess" : "guesses"}!`, "good");
+    $("lastResult").textContent = "TARGET FOUND"; $("lastResult").style.color = "var(--green)";
+    showWin();
+  }
+  function finishLoss() {
+    gameOver = true; setStatus("ROUND OVER", false); $("guessInput").disabled = true; $("guessButton").disabled = true;
+    records.currentStreak = 0; saveRecords(); setMessage(`Out of attempts! The secret number was ${secret}. Start another hunt, ${playerName()}.`, "bad");
+    $("lastResult").textContent = "MISSED"; $("lastResult").style.color = "var(--red)"; loseSound();
+  }
+  function submitGuess(event) {
+    event.preventDefault(); if (gameOver) return;
+    const cfg = currentLevel(), raw = $("guessInput").value;
+    if (raw.trim() === "") { setMessage("Enter a number before locking in.", "bad"); return; }
+    const guess = Number(raw);
+    if (!Number.isInteger(guess) || guess < cfg.min || guess > cfg.max) {
+      setMessage(`Your guess must be a whole number from ${cfg.min} to ${cfg.max}.`, "bad");
+      $("guessInput").classList.remove("shake"); void $("guessInput").offsetWidth; $("guessInput").classList.add("shake"); tone(180,.09,"square",.02); return;
+    }
+    if (history.some(item => item.guess === guess)) {
+      setMessage("You've already tried that number. Make a new guess.", "warm"); return;
+    }
+    attemptsUsed++;
+    const distance = Math.abs(secret - guess);
+    let item;
+    if (guess === secret) {
+      item = { guess, hint: "Perfect hit!", badge: "WIN", kind: "win" };
+    } else if (guess < secret) {
+      const close = distance <= Math.max(5, Math.ceil((cfg.max-cfg.min)*.08));
+      item = { guess, hint: close ? "Too low · very close" : "Too low · aim higher", badge: close ? "HOT" : "LOW", kind: close ? "close" : "far" };
+    } else {
+      const close = distance <= Math.max(5, Math.ceil((cfg.max-cfg.min)*.08));
+      item = { guess, hint: close ? "Too high · very close" : "Too high · aim lower", badge: close ? "HOT" : "HIGH", kind: close ? "close" : "far" };
+    }
+    history.unshift(item); $("lastGuess").textContent = guess;
+    $("lastResult").textContent = item.badge; $("lastResult").style.color = item.kind === "win" ? "var(--green)" : item.kind === "close" ? "var(--yellow)" : "var(--muted)";
+    updateAttempts(); renderHistory(); thermal(distance);
+    if (guess === secret) { finishWin(); return; }
+    tone(guess < secret ? 290 : 390, .08, "sine", .025);
+    if (attemptsUsed >= cfg.attempts) { finishLoss(); return; }
+    const distanceHint = distance <= Math.max(2, Math.ceil((cfg.max-cfg.min)*.02)) ? " You're burning hot!" :
+      distance <= Math.max(5, Math.ceil((cfg.max-cfg.min)*.08)) ? " You're very close!" :
+      distance <= Math.ceil((cfg.max-cfg.min)*.18) ? " You're getting warmer." : " That's cold.";
+    setMessage((guess < secret ? "Too low. Go higher." : "Too high. Go lower.") + distanceHint, item.kind === "close" ? "warm" : "");
+    $("guessInput").value = ""; $("guessInput").focus();
+  }
+  document.querySelectorAll(".level-card").forEach(button => {
+    button.addEventListener("click", () => {
+      if (button.dataset.level === levelKey) return;
+      levelKey = button.dataset.level;
+      document.querySelectorAll(".level-card").forEach(b => b.classList.toggle("selected", b === button));
+      clickSound(); startGame();
+    });
   });
-  attemptDots.setAttribute("aria-label", `${remaining} attempts remaining`);
-}
-
-function updateHistory() {
-  historyCount.textContent = `${guessHistory.length} ${guessHistory.length === 1 ? "GUESS" : "GUESSES"}`;
-  if (guessHistory.length === 0) {
-    lastGuess.textContent = "—";
-    lastResult.textContent = "No guesses yet";
-    lastResult.style.color = "";
-    recentGuesses.innerHTML = '<span class="empty-history">Your guesses will appear here.</span>';
-    return;
-  }
-
-  const latest = guessHistory[guessHistory.length - 1];
-  lastGuess.textContent = latest.number;
-  lastResult.textContent = latest.resultLabel;
-  lastResult.style.color = latest.result === "correct" ? "var(--cyan)" :
-    latest.result === "low" ? "#ffdc91" : "#d5c5ff";
-
-  recentGuesses.innerHTML = "";
-  guessHistory.slice(-5).reverse().forEach((entry) => {
-    const chip = document.createElement("span");
-    chip.className = `guess-chip ${entry.result}`;
-    chip.textContent = entry.number;
-    chip.title = entry.resultLabel;
-    recentGuesses.appendChild(chip);
+  $("guessForm").addEventListener("submit", submitGuess);
+  $("restartButton").addEventListener("click", () => { clickSound(); startGame(); });
+  $("newGameTop").addEventListener("click", () => { clickSound(); startGame(); });
+  $("overlayNewGame").addEventListener("click", () => { clickSound(); startGame(); });
+  $("playerName").addEventListener("input", () => {
+    try { localStorage.setItem(NAME_KEY, $("playerName").value.trim()); } catch (_) {}
+    $("welcomeText").textContent = `Welcome, ${playerName()}. Ready to hunt?`;
   });
-}
-
-function recordWin() {
-  records.totalWins += 1;
-  records.currentStreak += 1;
-  records.bestStreak = Math.max(records.bestStreak, records.currentStreak);
-  if (records.bestGuesses === null || attemptsUsed < records.bestGuesses) {
-    records.bestGuesses = attemptsUsed;
-    scoreMessage.textContent = `New personal best! You won in ${attemptsUsed} ${attemptsUsed === 1 ? "guess" : "guesses"}.`;
-  }
-  saveRecords();
-  updateScoreboard();
-}
-
-function recordLoss() {
-  records.currentStreak = 0;
-  saveRecords();
-  updateScoreboard();
-}
-
-function finishGame(message, type) {
-  gameOver = true;
-  guessInput.disabled = true;
-  guessButton.disabled = true;
-  restartButton.hidden = false;
-  setFeedback(message, type);
-}
-
-guessForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  if (gameOver) return;
-
-  const guess = Number(guessInput.value);
-  if (!Number.isInteger(guess) || guess < MIN_NUMBER || guess > MAX_NUMBER) {
-    setFeedback("Enter a whole number between 1 and 100.", "ready");
-    guessInput.focus();
-    return;
-  }
-
-  attemptsUsed++;
-  let result;
-  let resultLabel;
-  if (guess === secretNumber) {
-    result = "correct";
-    resultLabel = "Correct!";
-  } else if (guess < secretNumber) {
-    result = "low";
-    resultLabel = "Too low";
-  } else {
-    result = "high";
-    resultLabel = "Too high";
-  }
-
-  guessHistory.push({ number: guess, result, resultLabel });
-  updateAttempts();
-  updateHistory();
-
-  if (guess === secretNumber) {
-    recordWin();
-    finishGame(`Target acquired! The secret number was ${secretNumber}.`, "win");
-    return;
-  }
-
-  if (attemptsUsed === MAX_ATTEMPTS) {
-    recordLoss();
-    finishGame(`Mission over. The secret number was ${secretNumber}.`, "loss");
-    return;
-  }
-
-  setFeedback(guess < secretNumber ? "Too low. Try a higher number." : "Too high. Try a lower number.", guess < secretNumber ? "low" : "high");
-  guessInput.value = "";
-  guessInput.focus();
-});
-
-restartButton.addEventListener("click", startGame);
-
-resetScoresButton.addEventListener("click", () => {
-  const confirmed = window.confirm("Reset all Number Hunt personal records in this browser?");
-  if (!confirmed) return;
-  records = emptyRecords();
-  saveRecords();
-  updateScoreboard();
-});
-
-updateScoreboard();
-startGame();
-
+  $("soundToggle").addEventListener("click", () => {
+    soundOn = !soundOn; $("soundToggle").innerHTML = soundOn ? "🔊 <span>Sound on</span>" : "🔇 <span>Sound off</span>";
+    $("soundToggle").classList.toggle("muted-sound", !soundOn); $("soundToggle").setAttribute("aria-pressed", String(soundOn));
+    if (soundOn) clickSound();
+  });
+  $("resetRecords").addEventListener("click", () => {
+    if (!confirm("Reset all Number Hunt records on this browser? This cannot be undone.")) return;
+    records = { bestScore: null, totalWins: 0, currentStreak: 0, bestStreak: 0 };
+    saveRecords(); setMessage("Records reset. A fresh legend begins now.", "good"); clickSound();
+  });
+  $("guessInput").addEventListener("keydown", event => { if (event.key === "Escape") $("guessInput").value = ""; });
+  $("winOverlay").addEventListener("click", event => { if (event.target === $("winOverlay")) { $("winOverlay").classList.remove("show"); $("winOverlay").setAttribute("aria-hidden","true"); } });
+  try { $("playerName").value = localStorage.getItem(NAME_KEY) || ""; } catch (_) {}
+  $("welcomeText").textContent = `Welcome, ${playerName()}. Ready to hunt?`;
+  renderRecords(); startGame();
+})();
