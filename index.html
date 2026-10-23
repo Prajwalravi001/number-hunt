@@ -3,121 +3,87 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#080c18">
-  <title>Number Hunt | Prajwal</title>
+  <meta name="theme-color" content="#080b18">
+  <title>Number Hunt | Ultimate Edition</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="ambient ambient-one" aria-hidden="true"></div>
-  <div class="ambient ambient-two" aria-hidden="true"></div>
-  <main class="app">
+  <div class="stars" aria-hidden="true"></div>
+  <main class="app-shell">
     <header class="topbar">
-      <div class="brand-mark" aria-hidden="true">⌖</div>
-      <div>
-        <p class="eyebrow">A LOGIC ARCADE GAME</p>
-        <h1>NUMBER <span>HUNT</span></h1>
+      <a class="brand" href="#" aria-label="Number Hunt home"><span class="brand-mark">N<span>H</span></span><span>NUMBER<span class="brand-accent">HUNT</span><small>ULTIMATE EDITION</small></span></a>
+      <div class="top-actions">
+        <button id="soundToggle" class="icon-btn" type="button" aria-pressed="true" title="Toggle sound">🔊 <span>Sound on</span></button>
+        <button id="newGameTop" class="icon-btn" type="button">↻ <span>New game</span></button>
       </div>
-      <div class="status"><span class="status-dot"></span> READY</div>
     </header>
 
-    <section class="game-card" aria-labelledby="game-title">
-      <div class="card-topline">
-        <span class="pill">MISSION 01</span>
-        <span class="range-label">TARGET RANGE <strong>01–100</strong></span>
-      </div>
-
-      <div class="hero">
-        <div class="target-icon" aria-hidden="true">⌕</div>
-        <p class="eyebrow">YOUR MISSION</p>
-        <h2 id="game-title">Find the secret number.</h2>
-        <p class="subtitle">Seven attempts. Follow the clues. Lock on to the target.</p>
-      </div>
-
-      <div class="attempts-panel">
-        <div class="attempts-heading">
-          <span>ATTEMPTS REMAINING</span>
-          <strong id="attempt-count">7 <small>/ 7</small></strong>
-        </div>
-        <div id="attempt-dots" class="attempt-dots" aria-label="7 attempts remaining">
-          <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-        </div>
-      </div>
-
-      <form id="guess-form" class="guess-form">
-        <label for="guess-input">ENTER YOUR GUESS</label>
-        <div class="input-row">
-          <input id="guess-input" type="number" min="1" max="100" step="1"
-                 placeholder="1–100" autocomplete="off" required>
-          <button id="guess-button" type="submit">GUESS <span aria-hidden="true">↗</span></button>
-        </div>
-        <p class="input-hint">Choose a whole number from 1 to 100.</p>
-      </form>
-
-      <div id="feedback" class="feedback" role="status" aria-live="polite">
-        <span class="feedback-icon" aria-hidden="true">◈</span>
-        <span id="feedback-text">System ready. Make your first guess.</span>
-      </div>
-
-      <section class="history-panel" aria-labelledby="history-title">
-        <div class="history-heading">
-          <div>
-            <p class="eyebrow">YOUR TRACKER</p>
-            <h3 id="history-title">Guess history</h3>
-          </div>
-          <span id="history-count" class="history-count">0 GUESSES</span>
-        </div>
-        <div class="history-grid">
-          <div class="history-stat">
-            <span class="stat-label">LAST GUESS</span>
-            <strong id="last-guess">—</strong>
-            <span id="last-result" class="stat-note">No guesses yet</span>
-          </div>
-          <div class="history-stat recent-stat">
-            <span class="stat-label">LAST 5 GUESSES</span>
-            <div id="recent-guesses" class="recent-guesses">
-              <span class="empty-history">Your guesses will appear here.</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="scores-panel" aria-labelledby="scores-title">
-        <div class="scores-heading">
-          <div>
-            <p class="eyebrow">PERSONAL RECORDS</p>
-            <h3 id="scores-title">High score</h3>
-          </div>
-          <span class="trophy" aria-hidden="true">🏆</span>
-        </div>
-        <div class="score-grid">
-          <div class="score-tile">
-            <span class="stat-label">BEST WIN</span>
-            <strong id="best-score">—</strong>
-            <span class="stat-note">Fewest guesses to win</span>
-          </div>
-          <div class="score-tile">
-            <span class="stat-label">TOTAL WINS</span>
-            <strong id="total-wins">0</strong>
-            <span class="stat-note">Rounds completed</span>
-          </div>
-          <div class="score-tile">
-            <span class="stat-label">WIN STREAK</span>
-            <strong id="win-streak">0</strong>
-            <span class="stat-note">Consecutive wins</span>
-          </div>
-        </div>
-        <p id="score-message" class="score-message">Win a round to set your first record.</p>
-        <button id="reset-scores" class="reset-scores" type="button">RESET RECORDS</button>
-      </section>
-
-      <button id="restart-button" class="restart-button" type="button" hidden>↻ PLAY AGAIN</button>
+    <section class="hero">
+      <div class="eyebrow"><span class="live-dot"></span> SYSTEM ONLINE <span class="eyebrow-line"></span> THINK FAST. HUNT SMART.</div>
+      <h1>FIND THE <span>NUMBER.</span></h1>
+      <p class="subtitle">A secret target. Limited attempts. Your logic is the weapon.</p>
     </section>
 
-    <footer>
-      <span>NUMBER HUNT <span class="footer-dot">•</span> BUILD YOUR LOGIC</span>
-      <span class="creator">MADE BY <strong>PRAJWAL</strong> <span class="footer-dot">✦</span></span>
-    </footer>
+    <section class="player-row panel">
+      <div class="player-info">
+        <div class="avatar">👾</div>
+        <div><label for="playerName">PLAYER ID</label><input id="playerName" maxlength="18" placeholder="Enter your name" autocomplete="nickname"></div>
+      </div>
+      <div class="welcome" id="welcomeText">Welcome, hunter. Your mission starts now.</div>
+    </section>
+
+    <section class="difficulty panel">
+      <div class="section-heading"><span class="section-icon">◈</span><div><h2>SELECT DIFFICULTY</h2><p>Choose your challenge before the hunt begins.</p></div></div>
+      <div class="difficulty-options" role="group" aria-label="Difficulty">
+        <button class="level-card" data-level="easy" type="button"><span class="level-icon">🟢</span><span class="level-name">EASY</span><span class="level-range">1 – 50</span><span class="level-attempts">10 attempts</span></button>
+        <button class="level-card selected" data-level="medium" type="button"><span class="level-icon">🟡</span><span class="level-name">MEDIUM</span><span class="level-range">1 – 100</span><span class="level-attempts">7 attempts</span></button>
+        <button class="level-card" data-level="hard" type="button"><span class="level-icon">🔴</span><span class="level-name">HARD</span><span class="level-range">1 – 500</span><span class="level-attempts">8 attempts</span></button>
+      </div>
+    </section>
+
+    <section class="game-layout">
+      <div class="game-panel panel">
+        <div class="game-panel-top"><span class="mini-label">TARGET TERMINAL</span><span id="gameStatus" class="status-pill"><span class="status-dot"></span> READY</span></div>
+        <div class="target-display"><div class="target-ring"><div class="target-inner"><span class="target-caption">TARGET RANGE</span><strong id="rangeDisplay">01 — 100</strong><span class="target-question">? ? ?</span></div></div></div>
+        <div class="attempt-head"><span>ATTEMPTS REMAINING</span><strong><span id="attemptsLeft">7</span><small id="attemptsTotal"> / 7</small></strong></div>
+        <div class="attempt-track" id="attemptTrack" aria-label="Attempts remaining"></div>
+        <form id="guessForm" class="guess-form">
+          <label for="guessInput">ENTER YOUR GUESS</label>
+          <div class="input-row"><input id="guessInput" type="number" min="1" max="100" placeholder="??" required inputmode="numeric" autocomplete="off"><button id="guessButton" class="primary-btn" type="submit">LOCK IN <span>➜</span></button></div>
+        </form>
+        <div id="message" class="message" role="status" aria-live="polite">Choose your difficulty, then enter a number to begin.</div>
+        <div class="last-guess"><span>LAST GUESS</span><strong id="lastGuess">—</strong><span id="lastResult" class="last-result">WAITING</span></div>
+        <button id="restartButton" class="secondary-btn" type="button">↻ RESTART ROUND</button>
+      </div>
+
+      <aside class="side-column">
+        <section class="panel stats-panel">
+          <div class="section-heading compact"><span class="section-icon">🏆</span><div><h2>HUNTER RECORDS</h2><p>Your stats on this device</p></div></div>
+          <div class="stats-grid">
+            <div class="stat-card"><span>PERSONAL BEST</span><strong id="bestScore">—</strong><small>guesses to win</small></div>
+            <div class="stat-card"><span>TOTAL WINS</span><strong id="totalWins">0</strong><small>successful hunts</small></div>
+            <div class="stat-card"><span>CURRENT STREAK</span><strong id="currentStreak">0</strong><small>wins in a row</small></div>
+            <div class="stat-card"><span>BEST STREAK</span><strong id="bestStreak">0</strong><small>all-time record</small></div>
+          </div>
+          <button id="resetRecords" class="text-btn" type="button">Reset records</button>
+        </section>
+
+        <section class="panel history-panel">
+          <div class="section-heading compact"><span class="section-icon">⌁</span><div><h2>GUESS LOG</h2><p>Latest signals from this round</p></div></div>
+          <div id="guessHistory" class="history-list"><div class="empty-history">Your guesses will appear here.</div></div>
+        </section>
+
+        <section class="panel hint-panel">
+          <div class="section-heading compact"><span class="section-icon">🌡️</span><div><h2>THERMAL SCANNER</h2><p>Distance-based target intel</p></div></div>
+          <div class="thermal-meter"><div id="thermalFill"></div></div>
+          <div id="thermalLabel" class="thermal-label">WAITING FOR FIRST GUESS</div>
+        </section>
+      </aside>
+    </section>
+
+    <footer><span>NUMBER HUNT <b>ULTIMATE</b></span><span>MADE BY <b>PRAJWAL</b> ✦</span><span class="footer-note">Records save in this browser.</span></footer>
   </main>
+  <div id="winOverlay" class="win-overlay" aria-hidden="true"><div class="confetti" id="confetti"></div><div class="win-card"><div class="win-medal">🏆</div><div class="eyebrow">TARGET ACQUIRED</div><h2 id="winTitle">MISSION COMPLETE!</h2><p id="winText">Excellent work, hunter.</p><button id="overlayNewGame" class="primary-btn" type="button">HUNT AGAIN ↗</button></div></div>
   <script src="script.js"></script>
 </body>
 </html>
