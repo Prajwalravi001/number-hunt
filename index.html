@@ -81,6 +81,35 @@
         </div>
       </section>
 
+      <section class="scores-panel" aria-labelledby="scores-title">
+        <div class="scores-heading">
+          <div>
+            <p class="eyebrow">PERSONAL RECORDS</p>
+            <h3 id="scores-title">High score</h3>
+          </div>
+          <span class="trophy" aria-hidden="true">🏆</span>
+        </div>
+        <div class="score-grid">
+          <div class="score-tile">
+            <span class="stat-label">BEST WIN</span>
+            <strong id="best-score">—</strong>
+            <span class="stat-note">Fewest guesses to win</span>
+          </div>
+          <div class="score-tile">
+            <span class="stat-label">TOTAL WINS</span>
+            <strong id="total-wins">0</strong>
+            <span class="stat-note">Rounds completed</span>
+          </div>
+          <div class="score-tile">
+            <span class="stat-label">WIN STREAK</span>
+            <strong id="win-streak">0</strong>
+            <span class="stat-note">Consecutive wins</span>
+          </div>
+        </div>
+        <p id="score-message" class="score-message">Win a round to set your first record.</p>
+        <button id="reset-scores" class="reset-scores" type="button">RESET RECORDS</button>
+      </section>
+
       <button id="restart-button" class="restart-button" type="button" hidden>↻ PLAY AGAIN</button>
     </section>
 
