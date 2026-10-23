@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b1020">
-  <title>Number Hunt | Find the number</title>
+  <meta name="theme-color" content="#080c18">
+  <title>Number Hunt | Prajwal</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
   <main class="app">
     <header class="topbar">
       <div class="brand-mark" aria-hidden="true">⌖</div>
@@ -56,12 +58,35 @@
         <span id="feedback-text">System ready. Make your first guess.</span>
       </div>
 
+      <section class="history-panel" aria-labelledby="history-title">
+        <div class="history-heading">
+          <div>
+            <p class="eyebrow">YOUR TRACKER</p>
+            <h3 id="history-title">Guess history</h3>
+          </div>
+          <span id="history-count" class="history-count">0 GUESSES</span>
+        </div>
+        <div class="history-grid">
+          <div class="history-stat">
+            <span class="stat-label">LAST GUESS</span>
+            <strong id="last-guess">—</strong>
+            <span id="last-result" class="stat-note">No guesses yet</span>
+          </div>
+          <div class="history-stat recent-stat">
+            <span class="stat-label">LAST 5 GUESSES</span>
+            <div id="recent-guesses" class="recent-guesses">
+              <span class="empty-history">Your guesses will appear here.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <button id="restart-button" class="restart-button" type="button" hidden>↻ PLAY AGAIN</button>
     </section>
 
     <footer>
       <span>NUMBER HUNT <span class="footer-dot">•</span> BUILD YOUR LOGIC</span>
-      <span>MADE BY YOU <span class="footer-dot">✦</span></span>
+      <span class="creator">MADE BY <strong>PRAJWAL</strong> <span class="footer-dot">✦</span></span>
     </footer>
   </main>
   <script src="script.js"></script>
