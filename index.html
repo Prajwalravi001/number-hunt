@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1020">
+  <title>Number Hunt | Find the number</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand-mark" aria-hidden="true">⌖</div>
+      <div>
+        <p class="eyebrow">A LOGIC ARCADE GAME</p>
+        <h1>NUMBER <span>HUNT</span></h1>
+      </div>
+      <div class="status"><span class="status-dot"></span> READY</div>
+    </header>
+
+    <section class="game-card" aria-labelledby="game-title">
+      <div class="card-topline">
+        <span class="pill">MISSION 01</span>
+        <span class="range-label">TARGET RANGE <strong>01–100</strong></span>
+      </div>
+
+      <div class="hero">
+        <div class="target-icon" aria-hidden="true">⌕</div>
+        <p class="eyebrow">YOUR MISSION</p>
+        <h2 id="game-title">Find the secret number.</h2>
+        <p class="subtitle">Seven attempts. Follow the clues. Lock on to the target.</p>
+      </div>
+
+      <div class="attempts-panel">
+        <div class="attempts-heading">
+          <span>ATTEMPTS REMAINING</span>
+          <strong id="attempt-count">7 <small>/ 7</small></strong>
+        </div>
+        <div id="attempt-dots" class="attempt-dots" aria-label="7 attempts remaining">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <form id="guess-form" class="guess-form">
+        <label for="guess-input">ENTER YOUR GUESS</label>
+        <div class="input-row">
+          <input id="guess-input" type="number" min="1" max="100" step="1"
+                 placeholder="1–100" autocomplete="off" required>
+          <button id="guess-button" type="submit">GUESS <span aria-hidden="true">↗</span></button>
+        </div>
+        <p class="input-hint">Choose a whole number from 1 to 100.</p>
+      </form>
+
+      <div id="feedback" class="feedback" role="status" aria-live="polite">
+        <span class="feedback-icon" aria-hidden="true">◈</span>
+        <span id="feedback-text">System ready. Make your first guess.</span>
+      </div>
+
+      <button id="restart-button" class="restart-button" type="button" hidden>↻ PLAY AGAIN</button>
+    </section>
+
+    <footer>
+      <span>NUMBER HUNT <span class="footer-dot">•</span> BUILD YOUR LOGIC</span>
+      <span>MADE BY YOU <span class="footer-dot">✦</span></span>
+    </footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
